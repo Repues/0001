@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="light">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
@@ -28,7 +28,11 @@
       <li><button class="tab-btn active" data-tab="tab-simulacro">🎯 Simulacro</button></li>
       <li><button class="tab-btn" data-tab="tab-flashcards">📚 Nomenclatura</button></li>
     </ul>
-    <div style="position:absolute; bottom:24px; left:16px; right:16px;">
+    <div style="position:absolute; bottom:24px; left:16px; right:16px; display:flex; flex-direction:column; gap:10px;">
+      <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:rgba(255,255,255,0.05); border-radius:var(--radius); border:1px solid rgba(255,255,255,0.08);">
+        <span id="theme-icon-panel" style="font-size:0.8rem; color:var(--panel-soft);">🌙 Modo</span>
+        <button class="theme-toggle" id="theme-toggle-panel" title="Cambiar modo"></button>
+      </div>
       <button id="btn-logout" class="btn-secondary" style="width:100%; justify-content:center; font-size:0.85rem;">Cerrar sesión</button>
     </div>
   </aside>
@@ -309,6 +313,27 @@
       </div>
     `).join('');
   }
+<script>
+// Theme toggle — paneles usan data-theme en <html> para ajustes secundarios
+// pero el panel-dark del body mantiene el oscuro siempre
+(function() {
+  const html   = document.documentElement;
+  const saved  = localStorage.getItem('oece-theme') || 'light';
+  html.setAttribute('data-theme', saved);
+  // Esperamos el DOM
+  document.addEventListener('DOMContentLoaded', () => {
+    const toggle = document.getElementById('theme-toggle-panel');
+    const icon   = document.getElementById('theme-icon-panel');
+    if (!toggle) return;
+    icon.textContent = saved === 'dark' ? '☀️ Modo' : '🌙 Modo';
+    toggle.addEventListener('click', () => {
+      const next = html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      icon.textContent = next === 'dark' ? '☀️ Modo' : '🌙 Modo';
+      localStorage.setItem('oece-theme', next);
+    });
+  });
+})();
 </script>
 </body>
 </html>
