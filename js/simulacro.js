@@ -204,6 +204,8 @@ async function iniciarExamen() {
     });
 
     // 7. Mostrar examen con overlay
+    window._ordenPregunta = {}; // limpiar órdenes de examen anterior
+    window._examenActivo = true;
     document.getElementById('panel-config').style.display = 'none';
     document.getElementById('panel-examen').style.display = 'block';
     const overlay = document.getElementById('examen-overlay');
@@ -240,44 +242,47 @@ function renderPregunta(idx) {
   const card = document.getElementById('examen-card');
   if (card) {
     card.style.animation = 'none';
-    card.offsetHeight; // reflow
+    card.offsetHeight;
     card.style.animation = 'cardIn 0.32s cubic-bezier(0.34,1.56,0.64,1)';
   }
 
   const p = preguntasExamen[idx];
 
-  // Contador y progreso
   document.getElementById('num-pregunta').textContent = idx + 1;
   document.getElementById('tema-pregunta').textContent = p.tema || '';
   document.getElementById('texto-pregunta').textContent = p.Pregunta;
   document.getElementById('progreso-bar').style.width = `${((idx + 1) / preguntasExamen.length) * 100}%`;
 
-  // Contador omitidas
   const omitidas = respuestasAlumno.filter(r => r === null).length;
   const omEl = document.getElementById('omitidas-count');
   if (omEl) omEl.textContent = omitidas;
 
-  // Opciones — mezclar orden aleatoriamente para evitar memorización por posición
+  // Opciones — orden mezclado, GUARDADO por pregunta para que no cambie al re-renderizar
   const opcionesContainer = document.getElementById('opciones-container');
   opcionesContainer.innerHTML = '';
 
-  // Construir array de opciones disponibles con su letra original
   const letrasOriginales = ['A', 'B', 'C', 'D'].filter(l => p[l]);
-  // Mezclar Fisher-Yates
-  const letrasOrden = [...letrasOriginales];
-  for (let i = letrasOrden.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [letrasOrden[i], letrasOrden[j]] = [letrasOrden[j], letrasOrden[i]];
+
+  // Guardar orden la primera vez, reutilizarlo las siguientes
+  if (!window._ordenPregunta) window._ordenPregunta = {};
+  if (!window._ordenPregunta[idx]) {
+    const orden = [...letrasOriginales];
+    for (let i = orden.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [orden[i], orden[j]] = [orden[j], orden[i]];
+    }
+    window._ordenPregunta[idx] = orden;
   }
-  // Etiquetas visuales A/B/C/D para el orden mezclado
+  const letrasOrden = window._ordenPregunta[idx];
   const etiquetasVisuales = ['A', 'B', 'C', 'D'];
+  const correctaOriginal = p.correcta?.charAt(0);
 
   letrasOrden.forEach((letraOriginal, posicion) => {
     const etiquetaVisual = etiquetasVisuales[posicion];
     const btn = document.createElement('button');
     btn.className = 'opcion-btn';
-    btn.dataset.letra = letraOriginal; // letra real para validación Firebase
-    btn.dataset.visual = etiquetaVisual; // etiqueta que ve el alumno
+    btn.dataset.letra = letraOriginal;
+    btn.dataset.visual = etiquetaVisual;
     btn.innerHTML = `<span class="opcion-letra">${etiquetaVisual}</span><span class="opcion-texto">${p[letraOriginal]}</span>`;
 
     const respuesta = respuestasAlumno[idx];
@@ -285,9 +290,8 @@ function renderPregunta(idx) {
       btn.disabled = true;
       if (respuesta === letraOriginal) btn.classList.add('selected');
       if (modoCorreccion === 'momento') {
-        const correctaLetra = p.correcta?.charAt(0);
-        if (letraOriginal === correctaLetra) btn.classList.add('correcta');
-        if (respuesta === letraOriginal && respuesta !== correctaLetra) btn.classList.add('incorrecta');
+        if (letraOriginal === correctaOriginal) btn.classList.add('correcta');
+        if (respuesta === letraOriginal && respuesta !== correctaOriginal) btn.classList.add('incorrecta');
       }
     }
     btn.addEventListener('click', () => seleccionarRespuesta(idx, letraOriginal, btn));
@@ -296,30 +300,21 @@ function renderPregunta(idx) {
 
   if (modoCorreccion === 'momento' && respuestasAlumno[idx]) mostrarFeedbackMomento(idx);
 
-  // Navegación
   const btnAnt = document.getElementById('btn-anterior');
   const btnSig = document.getElementById('btn-siguiente');
-
   btnAnt.disabled = idx === 0;
   btnSig.textContent = idx === preguntasExamen.length - 1 ? 'Finalizar ✓' : 'Siguiente →';
 
   btnSig.onclick = () => {
-    if (idx === preguntasExamen.length - 1) {
-      finalizarExamen();
-      return;
-    }
-    // Aviso si no respondió esta pregunta
+    if (idx === preguntasExamen.length - 1) { finalizarExamen(); return; }
     if (!respuestasAlumno[idx]) {
-      const continuar = confirm('⚠️ No has respondido esta pregunta.\n\nAl hacer clic en "Aceptar" la estarás omitiendo y pasará como sin respuesta.\n\n¿Deseas continuar?');
+      const continuar = confirm('⚠️ No has respondido esta pregunta.\n\nSe guardará como omitida. ¿Deseas continuar?');
       if (!continuar) return;
     }
     currentIndex++;
     renderPregunta(currentIndex);
   };
-
-  btnAnt.onclick = () => {
-    if (idx > 0) { currentIndex--; renderPregunta(currentIndex); }
-  };
+  btnAnt.onclick = () => { if (idx > 0) { currentIndex--; renderPregunta(currentIndex); } };
 }
 
 function seleccionarRespuesta(idx, letra, btnClicked) {
@@ -341,7 +336,6 @@ function seleccionarRespuesta(idx, letra, btnClicked) {
     mostrarFeedbackMomento(idx);
   }
 
-  // Actualizar contador omitidas
   const omitidas = respuestasAlumno.filter(r => r === null).length;
   const omEl = document.getElementById('omitidas-count');
   if (omEl) omEl.textContent = omitidas;
@@ -349,23 +343,29 @@ function seleccionarRespuesta(idx, letra, btnClicked) {
 
 function mostrarFeedbackMomento(idx) {
   const p = preguntasExamen[idx];
-  const correctaLetra = p.correcta?.charAt(0);
-  const esCorrecto = respuestasAlumno[idx] === correctaLetra;
+  const correctaOriginal = p.correcta?.charAt(0);
+  const esCorrecto = respuestasAlumno[idx] === correctaOriginal;
   const feedbackEl = document.getElementById('feedback-momento');
   feedbackEl.className = `feedback-box ${esCorrecto ? 'feedback-correcto' : 'feedback-incorrecto'}`;
+
+  // Obtener la etiqueta VISUAL de la opción correcta (la que ve el alumno)
+  const orden = window._ordenPregunta?.[idx] || ['A','B','C','D'];
+  const posVisual = orden.indexOf(correctaOriginal);
+  const etqVisual = ['A','B','C','D'][posVisual] || correctaOriginal;
+
+  // Sustento sin letra original — solo el texto
+  const sustentoTexto = p.correcta?.replace(/^[A-D]\.\s*/, '') || '';
+
   feedbackEl.innerHTML = `
-    <div class="feedback-header">${esCorrecto ? '✅ ¡Correcto!' : '❌ Incorrecto'}</div>
-    <div class="feedback-sustento">${p.correcta}</div>
+    <div class="feedback-header">${esCorrecto ? '✅ ¡Correcto!' : `❌ Incorrecto — La respuesta correcta era la opción ${etqVisual}`}</div>
+    <div class="feedback-sustento">${sustentoTexto}</div>
   `;
   feedbackEl.style.display = 'block';
 }
 
-// renderMapa eliminado — ya no se usa el mapa de preguntas
-function renderMapa() {} // no-op, mantenido por compatibilidad
+function renderMapa() {}
 
 window.irPregunta = (idx) => { currentIndex = idx; renderPregunta(idx); };
-
-// Exponer finalizarExamen para el botón superior
 window._finalizarExamen = () => finalizarExamen();
 
 // ── TIMER ─────────────────────────────────────────────────────────────────────
@@ -379,14 +379,27 @@ function startTimer() {
     const min = Math.floor(restante / 60).toString().padStart(2, '0');
     const seg = (restante % 60).toString().padStart(2, '0');
     const timerEl = document.getElementById('timer');
+    const timerWrap = document.getElementById('timer-wrap');
     timerEl.textContent = `${min}:${seg}`;
-    timerEl.className = restante <= 600 ? 'card-timer warn' : 'card-timer';
+    const isWarn = restante <= 600;
+    timerEl.className = isWarn ? 'card-timer warn' : 'card-timer';
+    if (timerWrap) timerWrap.className = isWarn ? 'exam-timer warn' : 'exam-timer';
   }, 1000);
 }
+
+// ── ALERTA ANTI-REFRESH ───────────────────────────────────────────────────────
+window.addEventListener('beforeunload', (e) => {
+  if (window._examenActivo) {
+    e.preventDefault();
+    e.returnValue = '¿Seguro que quieres salir? Perderás todo el progreso del simulacro en curso.';
+    return e.returnValue;
+  }
+});
 
 // ── FINALIZAR ─────────────────────────────────────────────────────────────────
 async function finalizarExamen() {
   clearInterval(timerInterval);
+  window._examenActivo = false; // desactivar alerta beforeunload
   const tiempoUsado = Math.floor((Date.now() - tiempoInicio) / 1000);
 
   // Calcular resultados
