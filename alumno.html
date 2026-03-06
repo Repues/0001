@@ -5,6 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Mi Panel — OECE Simulacro</title>
   <link rel="stylesheet" href="css/styles.css" />
+  <style>
+    @media print {
+      body { display: none !important; }
+    }
+  </style>
 </head>
 <body>
 
@@ -194,6 +199,14 @@
         <div class="card" style="margin-bottom:20px;">
           <h3 style="margin-bottom:20px; font-size:1rem;">Análisis por tema</h3>
           <div id="analisis-temas"></div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:8px;">
+            <h3 style="font-size:1rem; margin:0;">🌡️ Mapa de calor — Evolución por tema</h3>
+            <span style="font-size:0.78rem; color:var(--gris-suave);">Compara tu sesión actual con tu historial</span>
+          </div>
+          <div id="mapa-calor-container"></div>
         </div>
 
         <div class="card" style="margin-bottom:20px;">
