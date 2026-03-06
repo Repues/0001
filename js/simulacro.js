@@ -46,8 +46,8 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 function initAlumno() {
-  document.getElementById('alumno-nombre').textContent = session.nombre;
-  document.getElementById('alumno-nivel').textContent = session.nivel.charAt(0).toUpperCase() + session.nivel.slice(1);
+  const nombreEl = document.getElementById('alumno-nombre');
+  if (nombreEl) nombreEl.textContent = session.nombre;
   document.getElementById('btn-logout').addEventListener('click', logout);
 
   setupNavAlumno();
