@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Panel Admin — OECE Simulacro</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="navbar-logo" style="margin:0 auto 10px;">OE</div>
+      <div class="navbar-title" style="font-size:1rem;">OECE Admin</div>
+      <div style="font-size:0.72rem; color:var(--gris-suave); margin-top:2px;">Panel de Administración</div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><button class="tab-btn active" data-tab="tab-dashboard">📊 Dashboard</button></li>
+      <li><button class="tab-btn" data-tab="tab-usuarios">👥 Usuarios</button></li>
+      <li><button class="tab-btn" data-tab="tab-carga">📂 Cargar Preguntas</button></li>
+    </ul>
+    <div style="position:absolute; bottom:24px; left:16px; right:16px;">
+      <button id="btn-logout" class="btn-secondary" style="width:100%; justify-content:center; font-size:0.85rem;">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- ── DASHBOARD ───────────────────────────── -->
+    <div id="tab-dashboard" class="tab-panel active">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Dashboard</h2>
+          <p class="page-sub">Resumen general del simulacro</p>
+        </div>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-num" id="stat-usuarios">—</div>
+          <div class="stat-label">Alumnos registrados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-preguntas">—</div>
+          <div class="stat-label">Preguntas en banco</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-simulacros">—</div>
+          <div class="stat-label">Simulacros completados</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-num" id="stat-promedio">—</div>
+          <div class="stat-label">Promedio general</div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:8px;">
+        <h3 style="margin-bottom:20px; font-size:1.1rem;">Últimos 10 simulacros</h3>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>DNI</th>
+                <th>Nivel</th>
+                <th>Puntaje</th>
+                <th>Resultado</th>
+                <th>Fecha</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-resultados">
+              <tr><td colspan="5" class="empty-row">Cargando...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── USUARIOS ────────────────────────────── -->
+    <div id="tab-usuarios" class="tab-panel">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Gestión de Alumnos</h2>
+          <p class="page-sub">Crear, editar y administrar accesos</p>
+        </div>
+        <button id="btn-nuevo-usuario" class="btn-primary">+ Nuevo alumno</button>
+      </div>
+
+      <div class="card" style="margin-bottom:20px;">
+        <input type="text" id="input-buscar" class="form-input" placeholder="🔍 Buscar por DNI o nombre..." style="max-width:360px;" />
+      </div>
+
+      <div class="card">
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>DNI</th>
+                <th>Nombre</th>
+                <th>Nivel</th>
+                <th>Plan</th>
+                <th>Teléfono</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody id="tabla-usuarios">
+              <tr><td colspan="7" class="empty-row">Cargando usuarios...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── CARGA JSON ──────────────────────────── -->
+    <div id="tab-carga" class="tab-panel">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Cargar Banco de Preguntas</h2>
+          <p class="page-sub">Sube un archivo .json y las preguntas se siembran automáticamente en Firebase</p>
+        </div>
+      </div>
+
+      <!-- Instrucciones del formato -->
+      <div class="card" style="margin-bottom:24px; border-left:3px solid var(--dorado);">
+        <h3 style="font-size:1rem; margin-bottom:12px; color:var(--dorado);">📋 Formato requerido del JSON</h3>
+        <pre style="background:rgba(0,0,0,0.3); padding:16px; border-radius:var(--radius); font-size:0.82rem; overflow-x:auto; line-height:1.6; color:rgba(255,255,255,0.85);">[
+  {
+    "id": "pregunta_001",           <span style="color:#6B9FFF;">// Opcional — se genera automático si no viene</span>
+    "Pregunta": "¿Texto completo de la pregunta?",
+    "A": "Primera opción",
+    "B": "Segunda opción",
+    "C": "Tercera opción",
+    "D": "Cuarta opción",
+    "correcta": "B: Sustento legal con cita del artículo correspondiente.",
+    "nivel": "avanzado",            <span style="color:#6B9FFF;">// "intermedio" o "avanzado" (exacto, minúsculas)</span>
+    "tema": "procedimientos"        <span style="color:#6B9FFF;">// Ver lista de temas válidos abajo</span>
+  }
+]</pre>
+        <details style="margin-top:14px;">
+          <summary style="cursor:pointer; color:var(--gris-suave); font-size:0.85rem;">Ver temas válidos</summary>
+          <p style="margin-top:10px; font-size:0.82rem; color:var(--gris-suave); line-height:2;">
+            generalidades · principios · procedimientos · contratacion_directa · subasta_inversa · convenio_marco · ejecucion_contractual · penalidades · resolucion_contrato · soluciones_controversias · garantias · adicionales_obra · supervision_obra · impedimentos · infracciones · RNP · PAC · expediente_tecnico · valor_referencial · comite_seleccion
+          </p>
+        </details>
+      </div>
+
+      <!-- Dropzone -->
+      <div id="dropzone" class="dropzone">
+        <div class="dropzone-icon">📂</div>
+        <p class="dropzone-text"><strong>Arrastra tu archivo .json aquí</strong></p>
+        <p class="dropzone-text" style="font-size:0.85rem; margin-top:6px;">o haz clic para seleccionar</p>
+        <input type="file" id="input-json" accept=".json" style="display:none;" />
+      </div>
+
+      <!-- Preview -->
+      <div id="preview-container" style="display:none; margin-top:24px;">
+        <h3 style="font-size:1rem; margin-bottom:16px;">Vista previa del archivo</h3>
+        <div id="preview-stats" class="preview-stats"></div>
+
+        <div class="table-container card">
+          <table>
+            <thead>
+              <tr><th>ID</th><th>Pregunta</th><th>Nivel</th><th>Tema</th><th>Respuesta correcta</th></tr>
+            </thead>
+            <tbody id="preview-tabla"></tbody>
+          </table>
+        </div>
+
+        <div style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap;">
+          <button id="btn-cargar" class="btn-primary" disabled>
+            🚀 Sembrar en Firebase
+          </button>
+          <button id="btn-limpiar" class="btn-secondary">🗑️ Limpiar</button>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div id="upload-progress" style="display:none; margin-top:20px;" class="card">
+        <p id="progress-text" style="margin-bottom:10px; font-size:0.9rem;">Iniciando carga...</p>
+        <div class="progress-bar-container">
+          <div id="progress-bar"></div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- MODAL USUARIO -->
+<div id="modal-overlay" class="modal-overlay"></div>
+<div id="modal-usuario" class="modal">
+  <div class="modal-header">
+    <h3 class="modal-title" id="modal-title">Nuevo Usuario</h3>
+    <button id="btn-cancelar" style="background:none; border:none; color:var(--gris-suave); font-size:1.4rem; cursor:pointer;">×</button>
+  </div>
+  <form id="form-usuario">
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div class="form-group">
+        <label class="form-label">DNI *</label>
+        <input type="text" id="u-dni" class="form-input" required placeholder="Ej: 74502478" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Nombre completo *</label>
+        <input type="text" id="u-nombre" class="form-input" required placeholder="Apellidos y nombres" />
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div class="form-group">
+        <label class="form-label">Nivel *</label>
+        <select id="u-nivel" class="form-select" required>
+          <option value="">Seleccionar</option>
+          <option value="intermedio">Intermedio</option>
+          <option value="avanzado">Avanzado</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Plan *</label>
+        <select id="u-plan" class="form-select" required>
+          <option value="">Seleccionar</option>
+          <option value="2 meses">2 meses (S/35)</option>
+          <option value="3 meses">3 meses (S/50)</option>
+        </select>
+      </div>
+    </div>
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:16px;">
+      <div class="form-group">
+        <label class="form-label">Teléfono</label>
+        <input type="text" id="u-telefono" class="form-input" placeholder="Ej: 964310396" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Estado</label>
+        <select id="u-activo" class="form-select">
+          <option value="true">Activo</option>
+          <option value="false">Inactivo</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Contraseña <span style="color:var(--gris-suave); font-weight:400;">(dejar vacío para no cambiar al editar)</span></label>
+      <input type="password" id="u-password" class="form-input" placeholder="Contraseña de acceso" />
+    </div>
+    <input type="hidden" id="campo-dni" />
+    <div class="modal-footer">
+      <button type="submit" id="btn-save-usuario" class="btn-primary">Guardar</button>
+    </div>
+  </form>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script type="module" src="js/admin.js"></script>
+</body>
+</html>

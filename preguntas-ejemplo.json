@@ -1,0 +1,112 @@
+[
+  {
+    "id": "pregunta_001",
+    "Pregunta": "¿Cuál es el monto máximo para una adjudicación simplificada de bienes y servicios según la Ley 32069?",
+    "A": "Hasta 8 UIT",
+    "B": "Hasta 200 UIT",
+    "C": "Hasta 400 UIT",
+    "D": "Hasta 1200 UIT",
+    "correcta": "C: Según el Art. 23 de la Ley 32069, la Adjudicación Simplificada aplica para bienes y servicios cuyo valor referencial sea superior a 8 UIT y hasta 400 UIT vigentes.",
+    "nivel": "avanzado",
+    "tema": "procedimientos"
+  },
+  {
+    "id": "pregunta_002",
+    "Pregunta": "¿Qué organismo es el ente rector del sistema de contrataciones del Estado en el Perú según la Ley 32069?",
+    "A": "Ministerio de Economía y Finanzas",
+    "B": "Contraloría General de la República",
+    "C": "Organismo Especializado en Contrataciones del Estado (OECE)",
+    "D": "Presidencia del Consejo de Ministros",
+    "correcta": "C: El Art. 4 de la Ley 32069 establece que la OECE es el organismo técnico especializado adscrito al MEF, encargado de supervisar, promover y ejecutar políticas de contratación estatal.",
+    "nivel": "intermedio",
+    "tema": "generalidades"
+  },
+  {
+    "id": "pregunta_003",
+    "Pregunta": "¿Cuál es la penalidad por mora aplicable en los contratos regulados por la Ley 32069?",
+    "A": "0.05% diario, máximo 5% del contrato",
+    "B": "0.10% diario, máximo 10% del contrato",
+    "C": "0.20% diario, máximo 15% del contrato",
+    "D": "1% diario, máximo 10% del contrato",
+    "correcta": "B: El Art. 162 del Reglamento establece que la penalidad por mora es de 0.10% por cada día de atraso, con un tope máximo del 10% del monto del contrato vigente, incluidas sus ampliaciones.",
+    "nivel": "intermedio",
+    "tema": "penalidades"
+  },
+  {
+    "id": "pregunta_004",
+    "Pregunta": "En el arbitraje derivado de contratos estatales bajo la Ley 32069, ¿qué requisito deben cumplir los árbitros?",
+    "A": "Ser abogados con 5 años de experiencia mínimo",
+    "B": "Estar inscritos en el Registro de Árbitros de la OECE",
+    "C": "Tener título de maestría en contrataciones públicas",
+    "D": "Ser designados únicamente por la Cámara de Comercio de Lima",
+    "correcta": "B: El Art. 222 del Reglamento de la Ley 32069 exige que los árbitros estén inscritos en el Registro de Árbitros administrado por la OECE para garantizar su idoneidad técnica e imparcialidad.",
+    "nivel": "avanzado",
+    "tema": "soluciones_controversias"
+  },
+  {
+    "id": "pregunta_005",
+    "Pregunta": "¿Qué es el Plan Anual de Contrataciones (PAC) según la Ley 32069?",
+    "A": "Un registro de contratos firmados en el año fiscal anterior",
+    "B": "El instrumento de gestión que contiene las contrataciones programadas para el año fiscal vigente",
+    "C": "Un reglamento interno de la OECE para supervisar compras mayores a 100 UIT",
+    "D": "Un convenio interinstitucional entre entidades del Estado",
+    "correcta": "B: El Art. 15 de la Ley 32069 define el PAC como el instrumento de gestión logística que contiene todas las contrataciones a realizarse durante el año fiscal, vinculado al Plan Operativo Institucional.",
+    "nivel": "intermedio",
+    "tema": "PAC"
+  },
+  {
+    "id": "pregunta_006",
+    "Pregunta": "¿Cuál es el porcentaje máximo para prestaciones adicionales en contratos de ejecución de obra?",
+    "A": "10% del monto del contrato original",
+    "B": "15% del monto del contrato original",
+    "C": "25% del monto del contrato original",
+    "D": "50% del monto del contrato original",
+    "correcta": "B: El Art. 207 del Reglamento de la Ley 32069 fija el límite en 15% del monto del contrato original. Para superar este límite se requiere autorización previa de la Contraloría General de la República.",
+    "nivel": "avanzado",
+    "tema": "adicionales_obra"
+  },
+  {
+    "id": "pregunta_007",
+    "Pregunta": "¿Cuál es la garantía que debe presentar el contratista para asegurar el cumplimiento de sus obligaciones?",
+    "A": "Garantía de seriedad de oferta por el 5% del valor referencial",
+    "B": "Póliza de seguro por el 15% del monto adjudicado",
+    "C": "Garantía de fiel cumplimiento equivalente al 10% del monto del contrato",
+    "D": "Carta fianza por el 20% del monto contractual",
+    "correcta": "C: El Art. 148 del Reglamento de la Ley 32069 establece que la garantía de fiel cumplimiento equivale al 10% del monto total del contrato. Puede ser carta fianza o póliza de caución.",
+    "nivel": "intermedio",
+    "tema": "garantias"
+  },
+  {
+    "id": "pregunta_008",
+    "Pregunta": "¿Bajo qué causal procede una Contratación Directa por situación de emergencia según la Ley 32069?",
+    "A": "Cuando el proceso regular demoraría más de 45 días hábiles",
+    "B": "Ante situaciones extraordinarias e imprevisibles que afecten servicios esenciales o la defensa nacional",
+    "C": "Cuando el postor ganador de la buena pro renuncia al contrato",
+    "D": "Para contratar a ex funcionarios con experiencia técnica acreditada",
+    "correcta": "B: El Art. 28, literal a) de la Ley 32069 establece que la Contratación Directa por emergencia procede ante situaciones extraordinarias e imprevisibles que comprometan la defensa del Estado, el orden interno o la continuidad de servicios públicos esenciales.",
+    "nivel": "avanzado",
+    "tema": "contratacion_directa"
+  },
+  {
+    "id": "pregunta_009",
+    "Pregunta": "¿Qué documento emite el Comité de Selección para responder consultas y observaciones de los postores?",
+    "A": "Bases Administrativas",
+    "B": "Pliego Absolutorio",
+    "C": "Bases Integradas",
+    "D": "Acta de Evaluación Técnica",
+    "correcta": "B: El Pliego Absolutorio es el documento oficial mediante el cual el Comité de Selección absuelve consultas y observaciones presentadas por los participantes, de acuerdo al Reglamento de la Ley 32069.",
+    "nivel": "intermedio",
+    "tema": "comite_seleccion"
+  },
+  {
+    "id": "pregunta_010",
+    "Pregunta": "¿Cuándo puede la Entidad resolver un contrato por causas atribuibles al contratista?",
+    "A": "Cuando acumule 5 días de atraso consecutivos",
+    "B": "Cuando la penalidad por mora o infracciones supere el 10% del monto del contrato",
+    "C": "Cuando el contratista solicite una ampliación de plazo no autorizada",
+    "D": "Solo mediante resolución judicial firme",
+    "correcta": "B: El Art. 164 del Reglamento de la Ley 32069 faculta a la Entidad a resolver el contrato cuando la penalidad acumulada —por mora u otras causas— supera el 10% del monto vigente del contrato.",
+    "nivel": "intermedio",
+    "tema": "resolucion_contrato"
+  }
+]

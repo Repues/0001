@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mi Panel — OECE Simulacro</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+
+<div class="dashboard-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <div class="navbar-logo" style="margin:0 auto 10px;">OE</div>
+      <div class="navbar-title" style="font-size:0.95rem;" id="alumno-nombre">—</div>
+      <div style="margin-top:4px;">
+        <span class="badge badge-nivel-avanzado" id="alumno-nivel">—</span>
+      </div>
+    </div>
+    <ul class="sidebar-nav">
+      <li><button class="tab-btn active" data-tab="tab-simulacro">🎯 Simulacro</button></li>
+      <li><button class="tab-btn" data-tab="tab-flashcards">📚 Nomenclatura</button></li>
+    </ul>
+    <div style="position:absolute; bottom:24px; left:16px; right:16px;">
+      <button id="btn-logout" class="btn-secondary" style="width:100%; justify-content:center; font-size:0.85rem;">Cerrar sesión</button>
+    </div>
+  </aside>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="main-content">
+
+    <!-- ── SIMULACRO ──────────────────────────── -->
+    <div id="tab-simulacro" class="tab-panel active">
+
+      <!-- CONFIG -->
+      <div id="panel-config">
+        <div class="page-header">
+          <div>
+            <h2 class="page-title">Simulacro de Examen</h2>
+            <p class="page-sub">Ley de Contrataciones del Estado N° 32069</p>
+          </div>
+        </div>
+
+        <div class="config-card">
+          <div class="config-info">
+            <div class="config-item">
+              <div class="config-item-num">72</div>
+              <div class="config-item-label">Preguntas</div>
+            </div>
+            <div class="config-item">
+              <div class="config-item-num">120'</div>
+              <div class="config-item-label">Minutos</div>
+            </div>
+            <div class="config-item">
+              <div class="config-item-num">70%</div>
+              <div class="config-item-label">Para aprobar</div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Modo de corrección</label>
+            <select id="modo-correccion" class="form-select">
+              <option value="final">Al finalizar el examen (recomendado)</option>
+              <option value="momento">En el momento (ver respuesta tras cada pregunta)</option>
+            </select>
+          </div>
+
+          <div style="background:rgba(201,168,76,0.08); border:1px solid rgba(201,168,76,0.2); border-radius:var(--radius); padding:14px; margin:16px 0; font-size:0.88rem; color:rgba(255,255,255,0.8);">
+            ⚡ <strong>Sin repetición inteligente:</strong> El sistema recuerda qué preguntas ya respondiste y siempre te presenta preguntas nuevas. Cuando hayas visto todas, el ciclo reinicia.
+          </div>
+
+          <button id="btn-iniciar-examen" class="btn-primary" style="width:100%; justify-content:center; font-size:1.05rem; padding:16px;">
+            🚀 Iniciar Simulacro
+          </button>
+        </div>
+      </div>
+
+      <!-- EXAMEN ACTIVO -->
+      <div id="panel-examen" style="display:none;">
+
+        <!-- Header del examen -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; flex-wrap:wrap; gap:12px;">
+          <div>
+            <span style="font-size:0.85rem; color:var(--gris-suave);">Pregunta</span>
+            <span id="num-pregunta" style="font-family:var(--font-display); font-size:1.6rem; color:var(--dorado); margin:0 4px;">1</span>
+            <span style="font-size:0.85rem; color:var(--gris-suave);">de <span id="examen-total">72</span></span>
+          </div>
+          <div id="timer" class="timer">120:00</div>
+        </div>
+
+        <!-- Barra de progreso -->
+        <div class="progreso-bar-container" style="margin-bottom:20px;">
+          <div id="progreso-bar" class="progreso-bar" style="width:0%"></div>
+        </div>
+
+        <!-- Layout: pregunta + mapa -->
+        <div class="examen-layout">
+
+          <!-- Pregunta -->
+          <div>
+            <div style="margin-bottom:14px;">
+              <span id="tema-pregunta" class="badge badge-nivel-intermedio"></span>
+            </div>
+            <p id="texto-pregunta" style="font-size:1.05rem; line-height:1.7; margin-bottom:20px;"></p>
+
+            <div id="opciones-container"></div>
+
+            <div id="feedback-momento" style="display:none;"></div>
+
+            <div style="display:flex; gap:12px; margin-top:24px; justify-content:space-between;">
+              <button id="btn-anterior" class="btn-secondary" disabled>← Anterior</button>
+              <button id="btn-siguiente" class="btn-primary">Siguiente →</button>
+            </div>
+          </div>
+
+          <!-- Mapa de preguntas -->
+          <div>
+            <div class="card">
+              <h4 style="font-size:0.85rem; color:var(--gris-suave); margin-bottom:14px; text-transform:uppercase; letter-spacing:0.08em;">Mapa de preguntas</h4>
+              <div id="mapa-preguntas" class="mapa-preguntas"></div>
+              <div style="margin-top:16px; font-size:0.78rem; color:var(--gris-suave);">
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                  <div style="width:14px;height:14px;background:var(--azul-bright);border-radius:3px;"></div> Actual
+                </div>
+                <div style="display:flex; align-items:center; gap:6px; margin-bottom:4px;">
+                  <div style="width:14px;height:14px;background:rgba(16,185,129,0.3);border-radius:3px;"></div> Respondida
+                </div>
+                <div style="display:flex; align-items:center; gap:6px;">
+                  <div style="width:14px;height:14px;background:rgba(255,255,255,0.07);border-radius:3px;"></div> Sin responder
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- RESULTADOS -->
+      <div id="panel-resultados" style="display:none;">
+        <div class="resultado-header">
+          <div id="resultado-icon" style="font-size:4rem; margin-bottom:12px;"></div>
+          <h2 id="resultado-titulo" style="margin-bottom:12px;"></h2>
+          <div class="resultado-stats">
+            <div class="stat-box">
+              <div class="stat-box-num" id="resultado-puntaje">—</div>
+              <div class="stat-box-label">Correctas</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-num" id="resultado-porcentaje">—</div>
+              <div class="stat-box-label">Porcentaje</div>
+            </div>
+            <div class="stat-box">
+              <div class="stat-box-num" id="resultado-tiempo">—</div>
+              <div class="stat-box-label">Tiempo usado</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <h3 style="margin-bottom:20px; font-size:1rem;">Análisis por tema</h3>
+          <div id="analisis-temas"></div>
+        </div>
+
+        <div class="card" style="margin-bottom:20px;">
+          <h3 style="margin-bottom:16px; font-size:1rem;">Revisión de respuestas</h3>
+          <div id="revision-respuestas"></div>
+        </div>
+
+        <div style="text-align:center; padding:20px;">
+          <button id="btn-nuevo-examen" class="btn-primary" style="font-size:1.05rem; padding:16px 36px;">
+            🔄 Nuevo simulacro
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- ── FLASHCARDS ──────────────────────────── -->
+    <div id="tab-flashcards" class="tab-panel">
+      <div class="page-header">
+        <div>
+          <h2 class="page-title">Nomenclatura OECE</h2>
+          <p class="page-sub">Conceptos clave de la Ley 32069 · Haz clic en la tarjeta para voltear</p>
+        </div>
+      </div>
+
+      <div class="flashcard-container">
+        <div id="flashcard" class="flashcard">
+          <div class="flashcard-face flashcard-front">
+            <div class="card-label">Término</div>
+            <div id="card-front-text" class="card-term">—</div>
+            <div class="card-hint">👆 Clic para ver definición</div>
+          </div>
+          <div class="flashcard-face flashcard-back">
+            <div class="card-label">Definición</div>
+            <div id="card-back-text" class="card-def">—</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flashcard-nav">
+        <button id="btn-prev-card">← Anterior</button>
+        <span id="card-counter" class="card-counter">1 / 18</span>
+        <button id="btn-next-card">Siguiente →</button>
+        <button id="btn-flip" class="btn-secondary" style="padding:10px 18px;">↺ Voltear</button>
+      </div>
+
+      <!-- Lista de todos los términos -->
+      <div class="card" style="margin-top:40px;">
+        <h3 style="margin-bottom:20px; font-size:1rem;">Todos los conceptos</h3>
+        <div style="display:grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap:10px;" id="lista-conceptos">
+          <!-- Generado dinámicamente por JS -->
+        </div>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast"></div>
+
+<script type="module" src="js/simulacro.js"></script>
+<script type="module">
+  // Lista de conceptos en panel de flashcards
+  const terms = [
+    'OECE','PAC','Adjudicación Simplificada','Licitación Pública','Concurso Público',
+    'Contratación Directa','RNP','Expediente de Contratación','Valor Referencial',
+    'Garantía de Fiel Cumplimiento','Penalidad por Mora','Subasta Inversa Electrónica',
+    'Convenio Marco','Adicional de Obra','Árbitro','UIT','Comité de Selección','Bases Integradas'
+  ];
+  const container = document.getElementById('lista-conceptos');
+  if (container) {
+    container.innerHTML = terms.map((t, i) => `
+      <div onclick="irFlashcard(${i})" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:10px 14px; font-size:0.85rem; cursor:pointer; transition:all 0.2s;" onmouseover="this.style.borderColor='rgba(201,168,76,0.3)'" onmouseout="this.style.borderColor='rgba(255,255,255,0.07)'">
+        <span style="color:var(--rojo-oece); font-weight:700; margin-right:6px;">${String(i+1).padStart(2,'0')}.</span>${t}
+      </div>
+    `).join('');
+  }
+</script>
+</body>
+</html>
