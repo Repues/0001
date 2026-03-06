@@ -416,13 +416,13 @@ footer a { color: var(--azul); }
 /* ================================================================
    PANELES ALUMNO / ADMIN — fondo oscuro siempre
    ================================================================ */
-.dashboard-layout { display: grid; grid-template-columns: 230px 1fr; min-height: 100vh; }
-.sidebar { background: var(--bg2); border-right: 1px solid var(--border); padding: 20px 13px; position: sticky; top: 0; height: 100vh; overflow-y: auto; }
+.dashboard-layout { display: grid; grid-template-columns: 220px 1fr; min-height: 100vh; overflow: hidden; }
+.sidebar { background: var(--bg2); border-right: 1px solid var(--border); padding: 20px 13px; position: sticky; top: 0; height: 100vh; overflow-y: auto; min-width: 0; }
 .sidebar-brand { text-align: center; padding: 6px 0 18px; border-bottom: 1px solid var(--border); margin-bottom: 16px; }
 .sidebar-nav { list-style: none; }
 .sidebar-nav li { margin-bottom: 3px; }
 .sidebar-nav .tab-btn { width: 100%; text-align: left; padding: 10px 13px; border-radius: var(--r); font-size: 0.84rem; display: flex; align-items: center; gap: 8px; }
-.main-content { padding: 26px; overflow-y: auto; }
+.main-content { padding: 28px 32px; overflow-y: auto; min-width: 0; }
 .page-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 22px; }
 .page-title { font-family: var(--font-d); font-size: 1.55rem; color: var(--text); }
 .page-sub   { color: var(--text3); margin-top: 3px; font-size: 0.88rem; }
@@ -467,7 +467,7 @@ footer a { color: var(--azul); }
 .perfil-chip.nivel-adv { background: rgba(16,185,129,0.15); border-color: rgba(16,185,129,0.3); color: #34D399; }
 
 /* Config simulacro */
-.config-card { max-width: 580px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 28px; }
+.config-card { max-width: 640px; background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-xl); padding: 28px; }
 .config-info { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 20px; }
 .config-item { text-align: center; background: var(--bg3); border-radius: var(--r); padding: 14px; border: 1px solid var(--border); }
 .config-item-num   { font-family: var(--font-d); font-size: 1.5rem; color: var(--azul); }
@@ -755,3 +755,82 @@ footer a { color: var(--azul); }
   .modal form > div[style*="grid"] { grid-template-columns: 1fr !important; }
   .toast { left: 13px; right: 13px; max-width: 100%; }
 }
+
+/* ================================================================
+   OVERRIDE xAI-STYLE para paneles alumno/admin
+   ================================================================ */
+.panel-dark {
+  --bg:      #000000;
+  --bg2:     #0A0A0A;
+  --bg3:     #111111;
+  --surface: #0A0A0A;
+  --border:  #1F1F1F;
+  --border2: #2A2A2A;
+  --text:    #FFFFFF;
+  --text2:   #CCCCCC;
+  --text3:   #888888;
+}
+[data-theme="dark"] .panel-dark {
+  --bg:      #000000;
+  --bg2:     #080808;
+  --bg3:     #111111;
+  --border:  #1A1A1A;
+}
+
+/* Sidebar xAI */
+.panel-dark .sidebar {
+  background: var(--bg2);
+  border-right: 1px solid var(--border);
+}
+.panel-dark .sidebar-brand {
+  border-bottom: 1px solid var(--border);
+}
+.panel-dark .tab-btn.active {
+  background: #fff;
+  color: #000;
+}
+.panel-dark .card {
+  background: var(--bg2);
+  border-color: var(--border);
+}
+.panel-dark .config-card {
+  background: var(--bg2);
+  border-color: var(--border);
+}
+.panel-dark .config-item {
+  background: var(--bg3);
+  border-color: var(--border);
+}
+.panel-dark .form-input,
+.panel-dark .form-select {
+  background: var(--bg3);
+  border-color: var(--border);
+  color: var(--text);
+}
+.panel-dark .form-input:focus,
+.panel-dark .form-select:focus {
+  border-color: #fff;
+  background: var(--bg2);
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.08);
+}
+.panel-dark thead th {
+  background: var(--bg3);
+  color: var(--text3);
+}
+.panel-dark tbody td { border-color: var(--border); }
+.panel-dark tbody tr:hover td { background: rgba(255,255,255,0.03); }
+.panel-dark .stat-card { background: var(--bg2); border-color: var(--border); }
+.panel-dark .perfil-alumno {
+  background: var(--bg2);
+  border: 1px solid var(--border);
+}
+/* Grid fondo en paneles */
+.panel-dark::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 60px 60px; opacity: .35;
+}
+.panel-dark .dashboard-layout { position: relative; z-index: 1; }
