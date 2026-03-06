@@ -22,6 +22,21 @@ export async function loginUser(dni, password) {
 
     const data = snap.data();
     if (data.activo !== 'true') return { success: false, error: 'Cuenta inactiva. Contacta al administrador.' };
+
+    // Verificar vencimiento por fecha
+    if (data.fechaFin) {
+      const hoy = new Date(); hoy.setHours(0,0,0,0);
+      const fin = new Date(data.fechaFin); fin.setHours(0,0,0,0);
+      if (fin < hoy) {
+        // Marcar como inactivo automáticamente
+        try {
+          const { updateDoc } = await import("https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js");
+          await updateDoc(ref, { activo: 'false' });
+        } catch(_) {}
+        return { success: false, error: `Tu plan venció el ${data.fechaFin.split('-').reverse().join('/')}. Contacta al administrador para renovar.` };
+      }
+    }
+
     if (data.password !== password) return { success: false, error: 'Contraseña incorrecta.' };
 
     const session = {
