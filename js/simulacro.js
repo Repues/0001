@@ -123,7 +123,7 @@ async function iniciarExamen() {
 
   const modoExamen = session.nivel === 'avanzado'
     ? (document.getElementById('modo-examen')?.value || '100avanzado')
-    : 'mixto_intermedio'; // intermedio siempre es 60/40
+    : 'mixto_intermedio'; // intermedio siempre es 50/50
 
   try {
     // 1. Obtener sesión anti-repetición
@@ -135,7 +135,7 @@ async function iniciarExamen() {
 
     // 2. Cargar banco de preguntas según lo que necesitamos
     const necesitaInt = modoExamen === 'mixto_intermedio' || modoExamen === 'mixto_avanzado';
-    const necesitaAdv = modoExamen !== 'mixto_intermedio'; // todos los modos avanzado necesitan adv
+    const necesitaAdv = true; // todos los modos necesitan banco avanzado
 
     let bancoInt = [], bancoAdv = [];
 
@@ -152,9 +152,9 @@ async function iniciarExamen() {
     let cantInt = 0, cantAdv = 0;
 
     if (modoExamen === 'mixto_intermedio') {
-      // Plan Intermedio: 60% intermedio + 40% avanzado
-      cantInt = Math.round(TOTAL_PREGUNTAS * 0.60); // 43
-      cantAdv = TOTAL_PREGUNTAS - cantInt;           // 29
+      // Plan Intermedio: 50% intermedio + 50% avanzado
+      cantInt = Math.round(TOTAL_PREGUNTAS * 0.50); // 36
+      cantAdv = TOTAL_PREGUNTAS - cantInt;           // 36
     } else if (modoExamen === '100avanzado') {
       // Plan Avanzado modo puro: 100% avanzado
       cantInt = 0;
@@ -203,14 +203,15 @@ async function iniciarExamen() {
       ultimaActualizacion: serverTimestamp()
     });
 
-    // 7. Mostrar examen
+    // 7. Mostrar examen con overlay
     document.getElementById('panel-config').style.display = 'none';
     document.getElementById('panel-examen').style.display = 'block';
+    const overlay = document.getElementById('examen-overlay');
+    if (overlay) overlay.style.display = 'flex';
     document.getElementById('examen-total').textContent = preguntasExamen.length;
 
     renderPregunta(currentIndex);
     startTimer();
-    renderMapa();
 
   } catch (e) {
     console.error(e);
@@ -229,21 +230,34 @@ function shuffleArray(arr) {
 }
 
 function renderPregunta(idx) {
-  // ── RESET: ocultar feedback y limpiar auto-avance pendiente ──
+  // Reset feedback y timers
   const feedbackEl = document.getElementById('feedback-momento');
   feedbackEl.style.display = 'none';
   feedbackEl.innerHTML = '';
+  if (window._autoAvanceTimer) { clearTimeout(window._autoAvanceTimer); window._autoAvanceTimer = null; }
 
-  if (window._autoAvanceTimer) {
-    clearTimeout(window._autoAvanceTimer);
-    window._autoAvanceTimer = null;
+  // Animación de entrada en la tarjeta
+  const card = document.getElementById('examen-card');
+  if (card) {
+    card.style.animation = 'none';
+    card.offsetHeight; // reflow
+    card.style.animation = 'cardIn 0.32s cubic-bezier(0.34,1.56,0.64,1)';
   }
 
   const p = preguntasExamen[idx];
+
+  // Contador y progreso
   document.getElementById('num-pregunta').textContent = idx + 1;
   document.getElementById('tema-pregunta').textContent = p.tema || '';
   document.getElementById('texto-pregunta').textContent = p.Pregunta;
+  document.getElementById('progreso-bar').style.width = `${((idx + 1) / preguntasExamen.length) * 100}%`;
 
+  // Contador omitidas
+  const omitidas = respuestasAlumno.filter(r => r === null).length;
+  const omEl = document.getElementById('omitidas-count');
+  if (omEl) omEl.textContent = omitidas;
+
+  // Opciones
   const opcionesContainer = document.getElementById('opciones-container');
   opcionesContainer.innerHTML = '';
 
@@ -254,50 +268,52 @@ function renderPregunta(idx) {
     btn.dataset.letra = letra;
     btn.innerHTML = `<span class="opcion-letra">${letra}</span><span class="opcion-texto">${p[letra]}</span>`;
 
-    // Si ya respondió
     const respuesta = respuestasAlumno[idx];
     if (respuesta) {
       btn.disabled = true;
       if (respuesta === letra) btn.classList.add('selected');
-
       if (modoCorreccion === 'momento') {
         const correctaLetra = p.correcta?.charAt(0);
         if (letra === correctaLetra) btn.classList.add('correcta');
         if (respuesta === letra && respuesta !== correctaLetra) btn.classList.add('incorrecta');
       }
     }
-
     btn.addEventListener('click', () => seleccionarRespuesta(idx, letra, btn));
     opcionesContainer.appendChild(btn);
   });
 
-  // Feedback inmediato si ya respondió en modo momento
-  if (modoCorreccion === 'momento' && respuestasAlumno[idx]) {
-    mostrarFeedbackMomento(idx);
-  }
+  if (modoCorreccion === 'momento' && respuestasAlumno[idx]) mostrarFeedbackMomento(idx);
 
   // Navegación
-  document.getElementById('btn-anterior').disabled = idx === 0;
-  document.getElementById('btn-siguiente').textContent =
-    idx === preguntasExamen.length - 1 ? 'Finalizar' : 'Siguiente →';
-  document.getElementById('btn-siguiente').onclick = () => {
-    if (idx === preguntasExamen.length - 1) finalizarExamen();
-    else { currentIndex++; renderPregunta(currentIndex); renderMapa(); }
-  };
-  document.getElementById('btn-anterior').onclick = () => {
-    if (idx > 0) { currentIndex--; renderPregunta(currentIndex); renderMapa(); }
+  const btnAnt = document.getElementById('btn-anterior');
+  const btnSig = document.getElementById('btn-siguiente');
+
+  btnAnt.disabled = idx === 0;
+  btnSig.textContent = idx === preguntasExamen.length - 1 ? 'Finalizar ✓' : 'Siguiente →';
+
+  btnSig.onclick = () => {
+    if (idx === preguntasExamen.length - 1) {
+      finalizarExamen();
+      return;
+    }
+    // Aviso si no respondió esta pregunta
+    if (!respuestasAlumno[idx]) {
+      const continuar = confirm('⚠️ No has respondido esta pregunta.\n\nAl hacer clic en "Aceptar" la estarás omitiendo y pasará como sin respuesta.\n\n¿Deseas continuar?');
+      if (!continuar) return;
+    }
+    currentIndex++;
+    renderPregunta(currentIndex);
   };
 
-  // Progreso
-  document.getElementById('progreso-bar').style.width = `${((idx + 1) / preguntasExamen.length) * 100}%`;
+  btnAnt.onclick = () => {
+    if (idx > 0) { currentIndex--; renderPregunta(currentIndex); }
+  };
 }
 
 function seleccionarRespuesta(idx, letra, btnClicked) {
-  if (respuestasAlumno[idx]) return; // ya respondió
-
+  if (respuestasAlumno[idx]) return;
   respuestasAlumno[idx] = letra;
 
-  // Deshabilitar todas las opciones
   document.querySelectorAll('.opcion-btn').forEach(b => {
     b.disabled = true;
     if (b.dataset.letra === letra) b.classList.add('selected');
@@ -313,7 +329,10 @@ function seleccionarRespuesta(idx, letra, btnClicked) {
     mostrarFeedbackMomento(idx);
   }
 
-  renderMapa();
+  // Actualizar contador omitidas
+  const omitidas = respuestasAlumno.filter(r => r === null).length;
+  const omEl = document.getElementById('omitidas-count');
+  if (omEl) omEl.textContent = omitidas;
 }
 
 function mostrarFeedbackMomento(idx) {
@@ -329,17 +348,13 @@ function mostrarFeedbackMomento(idx) {
   feedbackEl.style.display = 'block';
 }
 
-function renderMapa() {
-  const mapa = document.getElementById('mapa-preguntas');
-  mapa.innerHTML = preguntasExamen.map((_, i) => {
-    let cls = 'mapa-item';
-    if (i === currentIndex) cls += ' mapa-actual';
-    else if (respuestasAlumno[i]) cls += ' mapa-respondida';
-    return `<button class="${cls}" onclick="irPregunta(${i})">${i + 1}</button>`;
-  }).join('');
-}
+// renderMapa eliminado — ya no se usa el mapa de preguntas
+function renderMapa() {} // no-op, mantenido por compatibilidad
 
-window.irPregunta = (idx) => { currentIndex = idx; renderPregunta(idx); renderMapa(); };
+window.irPregunta = (idx) => { currentIndex = idx; renderPregunta(idx); };
+
+// Exponer finalizarExamen para el botón superior
+window._finalizarExamen = () => finalizarExamen();
 
 // ── TIMER ─────────────────────────────────────────────────────────────────────
 function startTimer() {
@@ -353,7 +368,7 @@ function startTimer() {
     const seg = (restante % 60).toString().padStart(2, '0');
     const timerEl = document.getElementById('timer');
     timerEl.textContent = `${min}:${seg}`;
-    timerEl.className = restante <= 600 ? 'timer timer-warning' : 'timer';
+    timerEl.className = restante <= 600 ? 'card-timer warn' : 'card-timer';
   }, 1000);
 }
 
@@ -400,6 +415,9 @@ async function finalizarExamen() {
 }
 
 async function mostrarResultados(correctas, total, porcentaje, tiempoUsado, detalle) {
+  // Ocultar overlay del examen
+  const overlay = document.getElementById('examen-overlay');
+  if (overlay) overlay.style.display = 'none';
   document.getElementById('panel-examen').style.display = 'none';
   document.getElementById('panel-resultados').style.display = 'block';
 
@@ -457,7 +475,10 @@ async function mostrarResultados(correctas, total, porcentaje, tiempoUsado, deta
     document.getElementById('panel-resultados').style.display = 'none';
     document.getElementById('panel-config').style.display = 'block';
     document.getElementById('btn-iniciar-examen').disabled = false;
-    document.getElementById('btn-iniciar-examen').textContent = 'Iniciar Simulacro';
+    document.getElementById('btn-iniciar-examen').textContent = '🚀 Iniciar Simulacro';
+    // Resetear overlay por si acaso
+    const overlay = document.getElementById('examen-overlay');
+    if (overlay) overlay.style.display = 'none';
   });
 }
 
